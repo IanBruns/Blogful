@@ -48,6 +48,15 @@ describe.only('Articles Endpoints', () => {
     });
 
     describe('GET /articles/:article_id', () => {
+        context('Given no articles in the Database', () => {
+            it(`responds with a 404 and Doesn't exist object`, () => {
+                const articleId = 123456;
+                return supertest(app)
+                    .get(`/articles/${articleId}`)
+                    .expect(404, { error: { message: `Article doesn't exist` } });
+            });
+        });
+
         context('Given there are articles in the database', () => {
             const testArticles = makeArticlesArray();
 
