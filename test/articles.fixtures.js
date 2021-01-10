@@ -33,4 +33,4 @@ function makeArticlesArray() {
 
 module.exports = {
     makeArticlesArray,
-}
+};

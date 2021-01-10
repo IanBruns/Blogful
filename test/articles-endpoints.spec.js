@@ -22,6 +22,14 @@ describe.only('Articles Endpoints', () => {
     afterEach('cleanup', () => db('blogful_articles').truncate());
 
     describe('GET /articles', () => {
+        context('Given no articles in the database', () => {
+            it('GET /articles returns 200 with an empty list', () => {
+                return supertest(app)
+                    .get('/articles')
+                    .expect(200, []);
+            });
+        });
+
         context('Given there are articles in the database', () => {
             const testArticles = makeArticlesArray();
 
