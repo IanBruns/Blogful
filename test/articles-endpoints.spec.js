@@ -2,7 +2,7 @@ const { expect } = require('chai');
 const knex = require('knex');
 const supertest = require('supertest');
 const app = require('../src/app');
-const { makeArticlesArray } = require('./articles.fixtures');
+const { makeArticlesArray, makeMaliciousArticle } = require('./articles.fixtures');
 
 describe('Articles Endpoints', () => {
     let db;
@@ -77,12 +77,7 @@ describe('Articles Endpoints', () => {
         });
 
         context(`Given an XSS attack article`, () => {
-            const maliciousArticle = {
-                id: 911,
-                title: 'Naughty naughty very naughty <script>alert("xss");</script>',
-                style: 'How-to',
-                content: `Bad image <img src="https://url.to.file.which/does-not.exist" onerror="alert(document.cookie);">. But not <strong>all</strong> bad.`
-            };
+            const maliciousArticle = makeMaliciousArticle();
 
             beforeEach('insert malicious article', () => {
                 return db
