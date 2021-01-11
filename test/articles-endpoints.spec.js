@@ -77,7 +77,7 @@ describe('Articles Endpoints', () => {
         });
 
         context(`Given an XSS attack article`, () => {
-            const maliciousArticle = makeMaliciousArticle();
+            const { maliciousArticle, expectedArticle } = makeMaliciousArticle();
 
             beforeEach('insert malicious article', () => {
                 return db
@@ -91,8 +91,8 @@ describe('Articles Endpoints', () => {
                     .expect(200)
                     .expect(res => {
                         // eslint-disable-next-line no-useless-escape
-                        expect(res.body.title).to.eql('Naughty naughty very naughty &lt;script&gt;alert(\"xss\");&lt;/script&gt;');
-                        expect(res.body.content).to.eql(`Bad image <img src="https://url.to.file.which/does-not.exist">. But not <strong>all</strong> bad.`);
+                        expect(res.body.title).to.eql(expectedArticle.title);
+                        expect(res.body.content).to.eql(expectedArticle.content);
                     });
             });
         });
