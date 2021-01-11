@@ -4,7 +4,7 @@ const supertest = require('supertest');
 const app = require('../src/app');
 const { makeArticlesArray } = require('./articles.fixtures');
 
-describe.only('Articles Endpoints', () => {
+describe('Articles Endpoints', () => {
     let db;
 
     before('make knex instance', () => {
@@ -73,6 +73,59 @@ describe.only('Articles Endpoints', () => {
                 return supertest(app)
                     .get(`/articles/${articleId}`)
                     .expect(200, expectedArticle);
+            });
+        });
+    });
+
+    describe.only('POST /articles', () => {
+        it('creates an article responding with a 201 and the new article', function () {
+            this.retries(3);
+
+            const newArticle = {
+                title: 'New title',
+                style: 'Listicle',
+                content: '1) Chris Hemsworth 2) Liam Hemsworth'
+            };
+
+            return supertest(app)
+                .post('/articles')
+                .send(newArticle)
+                .expect(201)
+                .expect(res => {
+                    expect(res.body.title).to.eql(newArticle.title);
+                    expect(res.body.style).to.eql(newArticle.style);
+                    expect(res.body.content).to.eql(newArticle.content);
+                    expect(res.body).to.have.property('id');
+                    expect(res.headers.location).to.eql(`/articles/${res.body.id}`);
+
+                    const expectedDate = new Date().toLocaleString();
+                    const actualDate = new Date(res.body.date_published).toLocaleString();
+                    expect(actualDate).to.eql(expectedDate);
+                })
+                .then(postRes => {
+                    return supertest(app)
+                        .get(`/articles/${postRes.body.id}`)
+                        .expect(postRes.body);
+                });
+        });
+
+        const requiredFields = ['title', 'style', 'content'];
+        requiredFields.forEach(field => {
+            const newArticle = {
+                title: '400 Test Title',
+                style: 'Listicle',
+                content: '400 Test Content'
+            };
+
+            it(`responds with a 400 and an error message when the '${field}' is missing`, () => {
+                delete newArticle[field];
+
+                return supertest(app)
+                    .post('/articles')
+                    .send(newArticle)
+                    .expect(400, {
+                        error: { message: `Missing '${field}' in request body` }
+                    });
             });
         });
     });
