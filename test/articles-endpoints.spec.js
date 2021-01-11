@@ -76,7 +76,7 @@ describe('Articles Endpoints', () => {
             });
         });
 
-        context(`Given an CSS attack article`, () => {
+        context(`Given an XSS attack article`, () => {
             const maliciousArticle = {
                 id: 911,
                 title: 'Naughty naughty very naughty <script>alert("xss");</script>',
