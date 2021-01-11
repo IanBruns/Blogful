@@ -47,7 +47,7 @@ describe('Articles Endpoints', () => {
         });
     });
 
-    describe('GET /articles/:article_id', () => {
+    describe.only('GET /articles/:article_id', () => {
         context('Given no articles in the Database', () => {
             it(`responds with a 404 and Doesn't exist object`, () => {
                 const articleId = 123456;
@@ -75,9 +75,35 @@ describe('Articles Endpoints', () => {
                     .expect(200, expectedArticle);
             });
         });
+
+        context(`Given an CSS attack article`, () => {
+            const maliciousArticle = {
+                id: 911,
+                title: 'Naughty naughty very naughty <script>alert("xss");</script>',
+                style: 'How-to',
+                content: `Bad image <img src="https://url.to.file.which/does-not.exist" onerror="alert(document.cookie);">. But not <strong>all</strong> bad.`
+            };
+
+            beforeEach('insert malicious article', () => {
+                return db
+                    .into('blogful_articles')
+                    .insert([maliciousArticle]);
+            });
+
+            it('Removes CSS attack content', () => {
+                return supertest(app)
+                    .get(`/articles/${maliciousArticle.id}`)
+                    .expect(200)
+                    .expect(res => {
+                        // eslint-disable-next-line no-useless-escape
+                        expect(res.body.title).to.eql('Naughty naughty very naughty &lt;script&gt;alert(\"xss\");&lt;/script&gt;');
+                        expect(res.body.content).to.eql(`Bad image <img src="https://url.to.file.which/does-not.exist">. But not <strong>all</strong> bad.`);
+                    });
+            });
+        });
     });
 
-    describe.only('POST /articles', () => {
+    describe('POST /articles', () => {
         it('creates an article responding with a 201 and the new article', function () {
             this.retries(3);
 
