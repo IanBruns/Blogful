@@ -47,7 +47,7 @@ describe('Articles Endpoints', () => {
         });
     });
 
-    describe.only('GET /articles/:article_id', () => {
+    describe('GET /articles/:article_id', () => {
         context('Given no articles in the Database', () => {
             it(`responds with a 404 and Doesn't exist object`, () => {
                 const articleId = 123456;
@@ -85,7 +85,7 @@ describe('Articles Endpoints', () => {
                     .insert([maliciousArticle]);
             });
 
-            it('Removes CSS attack content', () => {
+            it('Removes XSS attack content', () => {
                 return supertest(app)
                     .get(`/articles/${maliciousArticle.id}`)
                     .expect(200)
@@ -98,7 +98,7 @@ describe('Articles Endpoints', () => {
         });
     });
 
-    describe('POST /articles', () => {
+    describe.only('POST /articles', () => {
         it('creates an article responding with a 201 and the new article', function () {
             this.retries(3);
 
@@ -148,6 +148,19 @@ describe('Articles Endpoints', () => {
                         error: { message: `Missing '${field}' in request body` }
                     });
             });
+        });
+
+        it('Removes XSS attack content from response', () => {
+            const { maliciousArticle, expectedArticle } = makeMaliciousArticle();
+
+            return supertest(app)
+                .post('/articles')
+                .send(maliciousArticle)
+                .expect(201)
+                .expect(res => {
+                    expect(res.body.title).to.eql(expectedArticle.title);
+                    expect(res.body.content).to.eql(expectedArticle.content);
+                });
         });
     });
 });
