@@ -250,7 +250,7 @@ describe('Articles Endpoints', () => {
                 const expectedArticle = {
                     ...testArticles[idToUpdate - 1],
                     ...updateArticle
-                };
+                }
 
                 return supertest(app)
                     .patch(`/api/articles/${idToUpdate}`)
@@ -258,7 +258,7 @@ describe('Articles Endpoints', () => {
                     .expect(204)
                     .then(res =>
                         supertest(app)
-                            .get(`api/articles/${idToUpdate}`)
+                            .get(`/api/articles/${idToUpdate}`)
                             .expect(expectedArticle)
                     )
             });
